@@ -157,7 +157,7 @@ function BrainModel({
       <primitive object={coloredScene} />
       {centers.map((pos, idx) => (
         <group key={idx}>
-          <Line points={[pos, labelAnchors[idx]]} color="#ffffff" lineWidth={1} />
+          <Line points={[pos, labelAnchors[idx]]} color="#ffffffff" lineWidth={1} />
           <Html position={pos} center pointerEvents="none">
             <div
               style={{
@@ -170,19 +170,32 @@ function BrainModel({
             />
           </Html>
           <Html position={labelAnchors[idx]} center pointerEvents="auto">
-  <button
-    type="button"
-    className="brain-label"
-    onClick={(e) => {
-      e.stopPropagation()
-      if (onSelectRegion) {
-        onSelectRegion(REGION_KEYS[idx])
-      }
-    }}
-  >
-    {REGION_LABELS[idx] ?? `Region ${idx + 1}`}
-  </button>
-</Html>
+            <button
+              type="button"
+              className="brain-label"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onSelectRegion) {
+                  onSelectRegion(REGION_KEYS[idx])
+                }
+              }}
+              style={{
+                backgroundColor: 'rgba(104, 104, 104, 0.8)',
+                color: '#ffffffff',
+                padding: '2px 4px',
+                fontSize: '13px',
+                fontWeight: 400,
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+                whiteSpace: 'nowrap',
+                transition: 'transform 0.2s',
+              }}
+            >
+              {REGION_LABELS[idx] ?? `Region ${idx + 1}`}
+            </button>
+          </Html>
         </group>
       ))}
     </group>
