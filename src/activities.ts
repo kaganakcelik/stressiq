@@ -17,12 +17,6 @@ export type Activity = {
 export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
   TEMPORAL: [
     {
-      id: 'wire-stabilizer',
-      title: 'Wire Stabilizer (Breathing Sync)',
-      blurb: 'Match wires on inhale/exhale cues to shift toward calm.',
-      goalMetric: 'HF ↑, RMSSD ↑',
-    },
-    {
       id: 'threat-reframe',
       title: 'Threat Reframe',
       blurb: 'Quick reframe prompts to reduce threat response.',
@@ -33,12 +27,6 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
       title: 'Pulse Match',
       blurb: 'Tap to a slow rhythm to settle arousal.',
       goalMetric: 'HR ↓, RMSSD ↑',
-    },
-    {
-      id: 'calm-audio',
-      title: 'Calm Audio Scan',
-      blurb: '2 minutes of guided calming audio + minimal visuals.',
-      goalMetric: 'HR ↓',
     },
   ],
 
@@ -77,12 +65,6 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
       goalMetric: 'HF ↑, SampEn ↑',
     },
     {
-      id: 'logic-restore',
-      title: 'Logic Restore',
-      blurb: 'Quick pattern puzzle to re-engage executive control.',
-      goalMetric: 'SampEn ↑',
-    },
-    {
       id: 'focus-lock',
       title: 'Focus Lock',
       blurb: 'Track a slow object for 60 seconds.',
@@ -110,12 +92,6 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
       goalMetric: 'HR ↓',
     },
     {
-      id: 'spatial-match',
-      title: 'Spatial Match',
-      blurb: 'Slow, low-stim alignment puzzle.',
-      goalMetric: 'HR stabilizes',
-    },
-    {
       id: 'posture-check',
       title: 'Posture Check',
       blurb: 'Reset posture and jaw/shoulders.',
@@ -124,12 +100,6 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
   ],
 
   OCCIPITAL: [
-    {
-      id: 'screen-dim',
-      title: 'Screen Dim Reset',
-      blurb: 'Low-light mode + gentle breathing cue.',
-      goalMetric: 'HR ↓',
-    },
     {
       id: 'distance-gaze',
       title: 'Distance Gaze',
@@ -162,12 +132,6 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
       title: '3-Min Micro Walk',
       blurb: 'Movement to reduce global stress score.',
       goalMetric: 'LF/HF normalizes',
-    },
-    {
-      id: 'guided-relax',
-      title: 'Guided Relaxation',
-      blurb: 'Quick downshift to calm the system.',
-      goalMetric: 'HR ↓',
     },
     {
       id: 'cold-reset',

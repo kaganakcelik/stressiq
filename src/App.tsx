@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import './App.css'
 import { BrainViewer } from './BrainViewer'
+import { ActivityContainer } from './ActivityContainer'
 import type { BrainRegion, Activity } from './activities'
 import { ACTIVITIES_BY_REGION } from './activities'
 
@@ -10,6 +11,7 @@ function prettyRegion(r: BrainRegion) {
 
 function App() {
   const [selectedRegion, setSelectedRegion] = useState<BrainRegion | null>(null)
+  const [activeGame, setActiveGame] = useState<Activity | null>(null)
 
   const activities: Activity[] = useMemo(() => {
     if (!selectedRegion) return []
@@ -19,10 +21,19 @@ function App() {
   return (
     <div className="app-root">
       <main className="app-main">
-        <BrainViewer onSelectRegion={setSelectedRegion} />
+        <div style={{ display: activeGame ? 'none' : 'block', width: '100%', height: '100%' }}>
+          <BrainViewer onSelectRegion={setSelectedRegion} showLabels={!activeGame} />
+        </div>
+
+        {activeGame && (
+          <ActivityContainer
+            activity={activeGame}
+            onClose={() => setActiveGame(null)}
+          />
+        )}
 
         {/* Side panel */}
-        <aside className={`side-panel ${selectedRegion ? 'open' : ''}`}>
+        <aside className={`side-panel ${selectedRegion && !activeGame ? 'open' : ''}`}>
           <div className="side-panel-header">
             <div>
               <h2>{selectedRegion ? prettyRegion(selectedRegion) : 'Region'}</h2>
@@ -57,10 +68,7 @@ function App() {
                     </div>
                     <button
                       className="primary-btn"
-                      onClick={() => {
-                        // Later: route to mini-game / launch modal
-                        alert(`Start: ${a.title}`)
-                      }}
+                      onClick={() => setActiveGame(a)}
                     >
                       Let’s go
                     </button>

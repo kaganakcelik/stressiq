@@ -70,12 +70,14 @@ type BrainModelProps = {
   url?: string
   colorIndices: number[]
   onSelectRegion?: (region: typeof REGION_KEYS[number]) => void
+  showLabels?: boolean
 }
 
 function BrainModel({
   url = '/BrainSegmented.glb',
   colorIndices,
   onSelectRegion,
+  showLabels = true,
 }: BrainModelProps) {
   const gltf = useGLTF(url)
   const { coloredScene, centers, labelAnchors } = useMemo(() => {
@@ -155,7 +157,7 @@ function BrainModel({
   return (
     <group rotation={[0, 0.3, 0]}>
       <primitive object={coloredScene} />
-      {centers.map((pos, idx) => (
+      {showLabels && centers.map((pos, idx) => (
         <group key={idx}>
           <Line points={[pos, labelAnchors[idx]]} color="#ffffffff" lineWidth={1} />
           <Html position={pos} center pointerEvents="none">
@@ -246,9 +248,10 @@ function OrbitTargetLogger() {
 
 type BrainViewerProps = {
   onSelectRegion?: (region: typeof REGION_KEYS[number]) => void
+  showLabels?: boolean
 }
 
-export function BrainViewer({ onSelectRegion }: BrainViewerProps) {
+export function BrainViewer({ onSelectRegion, showLabels = true }: BrainViewerProps) {
   const [colorIndices, setColorIndices] = useState<number[]>([
     TEMPORAL_COLOR_INDEX,
     CEREBELLUM_COLOR_INDEX,
@@ -273,7 +276,7 @@ export function BrainViewer({ onSelectRegion }: BrainViewerProps) {
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <directionalLight position={[-5, -5, -5]} intensity={0.4} />
         <Suspense fallback={null}>
-          <BrainModel colorIndices={colorIndices} onSelectRegion={onSelectRegion} />
+          <BrainModel colorIndices={colorIndices} onSelectRegion={onSelectRegion} showLabels={showLabels} />
           <Environment preset="city" />
         </Suspense>
         <CameraPositionLogger />
