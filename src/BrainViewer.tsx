@@ -1,23 +1,25 @@
-import { Suspense, useMemo, useRef } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Environment, Html, Line } from '@react-three/drei'
 import * as THREE from 'three'
 
-const TEMPORAL_COLOR = '#ff6b6b' //Temporal
-const CEREBELLUM_COLOR = '#feca57' //Cerebellum
-const FRONTAL_COLOR = '#1dd1a1' //Fronta
-const PARIETAL_COLOR = '#54a0ff' //Parietal
-const OCCIPITAL_COLOR = '#5f27cd' //Occipital
-const SPINAL_COLOR = '#ff9ff3' //Spinal Cord
 
-const REGION_COLORS = [
-  TEMPORAL_COLOR,
-  CEREBELLUM_COLOR,
-  FRONTAL_COLOR,
-  PARIETAL_COLOR,
-  OCCIPITAL_COLOR,
-  SPINAL_COLOR,
-]
+
+const COLOR_BLUE = '#54a0ff'
+
+
+const COLOR_RED = '#ff6b6b'
+
+
+//each of these will range from 0 to 1, with 0 representing the blue color and 1 representing the red color
+const TEMPORAL_COLOR_INDEX = 0 //Temporal
+const CEREBELLUM_COLOR_INDEX = 0 //Cerebellum
+const FRONTAL_COLOR_INDEX = 0 //Fronta
+const PARIETAL_COLOR_INDEX = 0 //Parietal
+const OCCIPITAL_COLOR_INDEX = 0 //Occipital
+const SPINAL_COLOR_INDEX = 0 //spinal
+
+
 
 const REGION_LABELS = [
   'Temporal',
@@ -58,9 +60,10 @@ const INITIAL_CAMERA_Z = 475
 
 type BrainModelProps = {
   url?: string
+  colorIndices: number[]
 }
 
-function BrainModel({ url = '/BrainSegmented.glb' }: BrainModelProps) {
+function BrainModel({ url = '/BrainSegmented.glb', colorIndices }: BrainModelProps) {
   const gltf = useGLTF(url)
   const { coloredScene, centers, labelAnchors } = useMemo(() => {
     let index = 0
@@ -80,12 +83,10 @@ function BrainModel({ url = '/BrainSegmented.glb' }: BrainModelProps) {
       center.applyMatrix4(mesh.matrixWorld)
       centersList.push(center)
 
-      const hex =
-        REGION_COLORS[index] ??
-        REGION_COLORS[REGION_COLORS.length - 1]
+      const alpha = colorIndices[index] ?? 0
+      const color = new THREE.Color(COLOR_BLUE).lerp(new THREE.Color(COLOR_RED), alpha)
       const opacity =
         REGION_OPACITIES[index] ?? REGION_OPACITIES[REGION_OPACITIES.length - 1]
-      const color = new THREE.Color(hex)
       index += 1
 
       if (Array.isArray(mesh.material)) {
@@ -135,12 +136,7 @@ function BrainModel({ url = '/BrainSegmented.glb' }: BrainModelProps) {
     return { coloredScene: gltf.scene, centers: centersList, labelAnchors: anchors }
   }, [
     gltf,
-    TEMPORAL_OPACITY,
-    CEREBELLUM_OPACITY,
-    FRONTAL_OPACITY,
-    PARIETAL_OPACITY,
-    OCCIPITAL_OPACITY,
-    SPINAL_OPACITY,
+    colorIndices,
   ])
 
   return (
@@ -225,8 +221,17 @@ function OrbitTargetLogger() {
 }
 
 export function BrainViewer() {
+  const [colorIndices, setColorIndices] = useState<number[]>([
+    TEMPORAL_COLOR_INDEX,
+    CEREBELLUM_COLOR_INDEX,
+    FRONTAL_COLOR_INDEX,
+    PARIETAL_COLOR_INDEX,
+    OCCIPITAL_COLOR_INDEX,
+    SPINAL_COLOR_INDEX,
+  ])
+
   return (
-    <div className="brain-viewer">
+    <div className="brain-viewer" style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Canvas
         camera={{
           position: [INITIAL_CAMERA_X, INITIAL_CAMERA_Y, INITIAL_CAMERA_Z],
@@ -240,7 +245,7 @@ export function BrainViewer() {
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <directionalLight position={[-5, -5, -5]} intensity={0.4} />
         <Suspense fallback={null}>
-          <BrainModel />
+          <BrainModel colorIndices={colorIndices} />
           <Environment preset="city" />
         </Suspense>
         <CameraPositionLogger />
@@ -255,6 +260,41 @@ export function BrainViewer() {
           maxDistance={1000}
         />
       </Canvas>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: '20px',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(5, 5, 10, 0.8)',
+          padding: '15px 20px',
+          borderRadius: '12px',
+          border: '1px solid rgba(255,255,255,0.15)',
+        }}
+      >
+        {REGION_LABELS.map((label, idx) => (
+          <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'white' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>{label}</label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={colorIndices[idx]}
+              onChange={(e) => {
+                const newIndices = [...colorIndices]
+                newIndices[idx] = parseFloat(e.target.value)
+                setColorIndices(newIndices)
+              }}
+              style={{ cursor: 'pointer', width: '100px' }}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
