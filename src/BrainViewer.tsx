@@ -1,5 +1,5 @@
-import { Suspense, useMemo } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Suspense, useMemo, useRef } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
@@ -19,16 +19,16 @@ const REGION_COLORS = [
   SPINAL_COLOR,
 ]
 
-// Nudge the model to center it in view (x = left/right, y = up/down, z = forward/back)
-const MODEL_OFFSET_X = 0
-const MODEL_OFFSET_Y = 0
-const MODEL_OFFSET_Z = 0
+// Orbit target: the point the camera looks at (this is what moves when you pan)
+const ORBIT_TARGET_X = 15
+const ORBIT_TARGET_Y = -1.77
+const ORBIT_TARGET_Z = 33.277
 
 // Initial camera position (where you're looking from when the page loads)
 // e.g. [0, 0, 8] = in front, [8, 0, 0] = from the right, [0, 8, 0] = from above
-const INITIAL_CAMERA_X = 0
-const INITIAL_CAMERA_Y = 0
-const INITIAL_CAMERA_Z = 0
+const INITIAL_CAMERA_X = -64
+const INITIAL_CAMERA_Y = 140
+const INITIAL_CAMERA_Z = 475
 
 type BrainModelProps = {
   url?: string
@@ -71,16 +71,53 @@ function BrainModel({ url = '/BrainSegmented.glb' }: BrainModelProps) {
   }, [gltf])
 
   return (
-    <group
-      position={[MODEL_OFFSET_X, MODEL_OFFSET_Y, MODEL_OFFSET_Z]}
-      rotation={[0, 0.3, 0]}
-    >
+    <group rotation={[0, 0.3, 0]}>
       <primitive object={coloredScene} />
     </group>
   )
 }
 
 useGLTF.preload('/BrainSegmented.glb')
+
+function CameraPositionLogger() {
+  const { camera } = useThree()
+  const frameCount = useRef(0)
+  useFrame(() => {
+    frameCount.current += 1
+    if (frameCount.current % 15 !== 0) return
+    void camera.position.x // keep ref for when console.log below is uncommented
+    // const { x, y, z } = camera.position
+    // console.log(
+    //   'INITIAL_CAMERA_X =',
+    //   x,
+    //   ', INITIAL_CAMERA_Y =',
+    //   y,
+    //   ', INITIAL_CAMERA_Z =',
+    //   z,
+    // )
+  })
+  return null
+}
+
+function OrbitTargetLogger() {
+  const controls = useThree((s) => s.controls)
+  const frameCount = useRef(0)
+  useFrame(() => {
+    if (!controls || !('target' in controls)) return
+    frameCount.current += 1
+    if (frameCount.current % 15 !== 0) return
+    const { x, y, z } = (controls as { target: THREE.Vector3 }).target
+    console.log(
+      'ORBIT_TARGET_X =',
+      x,
+      ', ORBIT_TARGET_Y =',
+      y,
+      ', ORBIT_TARGET_Z =',
+      z,
+    )
+  })
+  return null
+}
 
 export function BrainViewer() {
   return (
@@ -101,8 +138,11 @@ export function BrainViewer() {
           <BrainModel />
           <Environment preset="city" />
         </Suspense>
+        <CameraPositionLogger />
+        <OrbitTargetLogger />
         <OrbitControls
-          enablePan={false}
+          target={[ORBIT_TARGET_X, ORBIT_TARGET_Y, ORBIT_TARGET_Z]}
+          enablePan={true}
           enableZoom
           enableRotate
           makeDefault
