@@ -29,6 +29,14 @@ const REGION_LABELS = [
   'Occipital',
   'Spinal',
 ]
+const REGION_KEYS = [
+  'TEMPORAL',
+  'CEREBELLUM',
+  'FRONTAL',
+  'PARIETAL',
+  'OCCIPITAL',
+  'SPINAL',
+] as const
 
 // Per-region opacity (0 = fully transparent, 1 = fully opaque)
 const TEMPORAL_OPACITY = 0.7
@@ -61,9 +69,14 @@ const INITIAL_CAMERA_Z = 475
 type BrainModelProps = {
   url?: string
   colorIndices: number[]
+  onSelectRegion?: (region: typeof REGION_KEYS[number]) => void
 }
 
-function BrainModel({ url = '/BrainSegmented.glb', colorIndices }: BrainModelProps) {
+function BrainModel({
+  url = '/BrainSegmented.glb',
+  colorIndices,
+  onSelectRegion,
+}: BrainModelProps) {
   const gltf = useGLTF(url)
   const { coloredScene, centers, labelAnchors } = useMemo(() => {
     let index = 0
@@ -156,22 +169,20 @@ function BrainModel({ url = '/BrainSegmented.glb', colorIndices }: BrainModelPro
               }}
             />
           </Html>
-          <Html position={labelAnchors[idx]} center pointerEvents="none">
-            <div
-              style={{
-                padding: '4px 8px',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: '#ffffff',
-                backgroundColor: 'rgba(5,5,10,0.8)',
-                border: '1px solid rgba(255,255,255,0.35)',
-                borderRadius: '6px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {REGION_LABELS[idx] ?? `Region ${idx + 1}`}
-            </div>
-          </Html>
+          <Html position={labelAnchors[idx]} center pointerEvents="auto">
+  <button
+    type="button"
+    className="brain-label"
+    onClick={(e) => {
+      e.stopPropagation()
+      if (onSelectRegion) {
+        onSelectRegion(REGION_KEYS[idx])
+      }
+    }}
+  >
+    {REGION_LABELS[idx] ?? `Region ${idx + 1}`}
+  </button>
+</Html>
         </group>
       ))}
     </group>
@@ -220,7 +231,11 @@ function OrbitTargetLogger() {
   return null
 }
 
-export function BrainViewer() {
+type BrainViewerProps = {
+  onSelectRegion?: (region: typeof REGION_KEYS[number]) => void
+}
+
+export function BrainViewer({ onSelectRegion }: BrainViewerProps) {
   const [colorIndices, setColorIndices] = useState<number[]>([
     TEMPORAL_COLOR_INDEX,
     CEREBELLUM_COLOR_INDEX,
@@ -245,7 +260,7 @@ export function BrainViewer() {
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <directionalLight position={[-5, -5, -5]} intensity={0.4} />
         <Suspense fallback={null}>
-          <BrainModel colorIndices={colorIndices} />
+          <BrainModel colorIndices={colorIndices} onSelectRegion={onSelectRegion} />
           <Environment preset="city" />
         </Suspense>
         <CameraPositionLogger />
