@@ -170,11 +170,11 @@ export function ActivityContainer({ activity, onClose }: { activity: Activity, o
         switch (activity.id) {
             // Breathing Mechanics
             case 'mindfulness-90':
-                return <BreathingGame duration={90} inhaleTime={4} exhaleTime={4} onComplete={() => setIsDone(true)} />
+                return <BreathingGame duration={12} inhaleTime={3} exhaleTime={3} onComplete={() => setIsDone(true)} />
             case 'coherent-breath-3':
-                return <BreathingGame duration={180} inhaleTime={5} exhaleTime={5} onComplete={() => setIsDone(true)} />
+                return <BreathingGame duration={10} inhaleTime={5} exhaleTime={5} onComplete={() => setIsDone(true)} />
             case 'dark-meditation':
-                return <BreathingGame duration={120} inhaleTime={6} exhaleTime={6} onComplete={() => setIsDone(true)} />
+                return <BreathingGame duration={12} inhaleTime={4} exhaleTime={4} onComplete={() => setIsDone(true)} />
 
             // Tap Mechanics
             case 'pulse-match':
@@ -189,7 +189,7 @@ export function ActivityContainer({ activity, onClose }: { activity: Activity, o
             // Focus Tracking
             case 'focus-lock':
             case 'distance-gaze':
-                return <FocusGame duration={60} onComplete={() => setIsDone(true)} />
+                return <FocusGame duration={15} onComplete={() => setIsDone(true)} />
 
             // Prompts mechanics (default/fallback for many)
             case 'threat-reframe':
@@ -210,7 +210,7 @@ export function ActivityContainer({ activity, onClose }: { activity: Activity, o
             case 'micro-walk-spinal':
                 return <PromptGame onComplete={() => setIsDone(true)} prompts={[
                     "Stand up from your current space.",
-                    "Walk consistently for the next 3 minutes.",
+                    "Walk consistently for the next 15 seconds.",
                     "Notice your breathing as you move."
                 ]} />
             case 'body-scan':
@@ -246,7 +246,7 @@ export function ActivityContainer({ activity, onClose }: { activity: Activity, o
 
             default:
                 // Catch all if I missed any
-                return <BreathingGame duration={60} inhaleTime={4} exhaleTime={4} onComplete={() => setIsDone(true)} />
+                return <BreathingGame duration={12} inhaleTime={3} exhaleTime={3} onComplete={() => setIsDone(true)} />
         }
     }
 

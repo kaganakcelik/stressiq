@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Environment, Html, Line } from '@react-three/drei'
 import * as THREE from 'three'
@@ -12,12 +12,7 @@ const COLOR_RED = '#ff6b6b'
 
 
 //each of these will range from 0 to 1, with 0 representing the blue color and 1 representing the red color
-const TEMPORAL_COLOR_INDEX = 0 //Temporal
-const CEREBELLUM_COLOR_INDEX = 0 //Cerebellum
-const FRONTAL_COLOR_INDEX = 0 //Fronta
-const PARIETAL_COLOR_INDEX = 0 //Parietal
-const OCCIPITAL_COLOR_INDEX = 0 //Occipital
-const SPINAL_COLOR_INDEX = 0 //spinal
+
 
 
 
@@ -29,7 +24,7 @@ const REGION_LABELS = [
   'Occipital',
   'Spinal',
 ]
-const REGION_KEYS = [
+export const REGION_KEYS = [
   'TEMPORAL',
   'CEREBELLUM',
   'FRONTAL',
@@ -249,18 +244,14 @@ function OrbitTargetLogger() {
 type BrainViewerProps = {
   onSelectRegion?: (region: typeof REGION_KEYS[number]) => void
   showLabels?: boolean
+  colorIndices: number[]
+  setColorIndices: (indices: number[]) => void
 }
 
-export function BrainViewer({ onSelectRegion, showLabels = true }: BrainViewerProps) {
-  const [colorIndices, setColorIndices] = useState<number[]>([
-    TEMPORAL_COLOR_INDEX,
-    CEREBELLUM_COLOR_INDEX,
-    FRONTAL_COLOR_INDEX,
-    PARIETAL_COLOR_INDEX,
-    OCCIPITAL_COLOR_INDEX,
-    SPINAL_COLOR_INDEX,
-  ])
+// @ts-expect-error - index.js is a plain JS file
+import { calculate_neuro_interface_values } from './index'
 
+export function BrainViewer({ onSelectRegion, showLabels = true, colorIndices, setColorIndices }: BrainViewerProps) {
   return (
     <div className="brain-viewer" style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Canvas

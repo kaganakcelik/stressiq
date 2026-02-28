@@ -115,7 +115,7 @@ const normal = {
     heart_rate: 65
 };
 
-let brain_values = calculate_neuro_interface_values(college_stress);
+let brain_values = calculate_neuro_interface_values(normal);
 
 brain_values = Object.fromEntries(
     Object.entries(brain_values).map(([k, v]) => [k, Number(Math.pow(v, 2).toFixed(3))])
@@ -124,4 +124,4 @@ brain_values = Object.fromEntries(
 console.log("Neurovisceral Output:", brain_values);
 
 // Export for usage elsewhere if needed
-module.exports = { calculate_neuro_interface_values };
+export { calculate_neuro_interface_values };

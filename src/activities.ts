@@ -32,12 +32,6 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
 
   CEREBELLUM: [
     {
-      id: 'balance-beam',
-      title: 'Balance Beam',
-      blurb: 'Slow tilt/drag control game for smooth movement.',
-      goalMetric: 'HR stabilizes',
-    },
-    {
       id: 'stretch-seq',
       title: 'Stretch Sequence',
       blurb: 'Short guided stretches with checkpoints.',
@@ -52,7 +46,7 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
     {
       id: 'micro-walk',
       title: 'Micro Walk',
-      blurb: '3-minute walk prompt to normalize arousal.',
+      blurb: 'Quick walk to normalize arousal.',
       goalMetric: 'LF/HF normalizes',
     },
   ],
@@ -60,14 +54,14 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
   FRONTAL: [
     {
       id: 'mindfulness-90',
-      title: 'Mindfulness 90',
-      blurb: '90-second focus to restore regulation.',
+      title: 'Mindfulness Reset',
+      blurb: '12-second focus to restore regulation.',
       goalMetric: 'HF ↑, SampEn ↑',
     },
     {
       id: 'focus-lock',
       title: 'Focus Lock',
-      blurb: 'Track a slow object for 60 seconds.',
+      blurb: 'Track a slow object for 15 seconds.',
       goalMetric: 'HR stabilizes',
     },
     {
@@ -103,7 +97,7 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
     {
       id: 'distance-gaze',
       title: 'Distance Gaze',
-      blurb: 'Look far away for 30 seconds to reduce visual load.',
+      blurb: 'Look far away for 15 seconds to reduce visual load.',
       goalMetric: 'HR ↓',
     },
     {
@@ -123,14 +117,14 @@ export const ACTIVITIES_BY_REGION: Record<BrainRegion, Activity[]> = {
   SPINAL: [
     {
       id: 'coherent-breath-3',
-      title: '3-Min Coherent Breathing',
+      title: 'Coherent Breathing',
       blurb: 'The global reset: inhale 5, exhale 5.',
       goalMetric: 'HF ↑, RMSSD ↑',
     },
     {
       id: 'micro-walk-spinal',
-      title: '3-Min Micro Walk',
-      blurb: 'Movement to reduce global stress score.',
+      title: 'Micro Walk Reset',
+      blurb: 'Brief movement to improve global stress score.',
       goalMetric: 'LF/HF normalizes',
     },
     {

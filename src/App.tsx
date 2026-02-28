@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import './App.css'
-import { BrainViewer } from './BrainViewer'
+import { BrainViewer, REGION_KEYS } from './BrainViewer'
 import { ActivityContainer } from './ActivityContainer'
 import type { BrainRegion, Activity } from './activities'
 import { ACTIVITIES_BY_REGION } from './activities'
+// @ts-expect-error - index.js is a plain JS file
+import { calculate_neuro_interface_values } from './index'
 
 function prettyRegion(r: BrainRegion) {
   return r.charAt(0) + r.slice(1).toLowerCase()
@@ -12,6 +14,50 @@ function prettyRegion(r: BrainRegion) {
 function App() {
   const [selectedRegion, setSelectedRegion] = useState<BrainRegion | null>(null)
   const [activeGame, setActiveGame] = useState<Activity | null>(null)
+  const [colorIndices, setColorIndices] = useState<number[]>(() => {
+    const college_stress = {
+      rmssd: 15,
+      sdnn: 25,
+      resp_rate: 28,
+      spo2: 95,
+      heart_rate: 115
+    };
+
+    const high_respiratory = {
+      rmssd: 10,
+      sdnn: 18,
+      resp_rate: 42,
+      spo2: 94,
+      heart_rate: 165
+    };
+
+    const normal = {
+      rmssd: 50,
+      sdnn: 65,
+      resp_rate: 14,
+      spo2: 98,
+      heart_rate: 65
+    };
+    const results = calculate_neuro_interface_values(college_stress);
+    return [
+      results.Temporal,
+      results.Cerebellum,
+      results.Frontal,
+      results.Parietal,
+      results.Occipital,
+      results.Global_S
+    ];
+  })
+
+  const handleGameComplete = () => {
+    if (!selectedRegion) return
+    const regionIdx = REGION_KEYS.indexOf(selectedRegion as any)
+    if (regionIdx !== -1) {
+      const newIndices = [...colorIndices]
+      newIndices[regionIdx] = Math.max(0, newIndices[regionIdx] - 0.4)
+      setColorIndices(newIndices)
+    }
+  }
 
   const activities: Activity[] = useMemo(() => {
     if (!selectedRegion) return []
@@ -22,13 +68,21 @@ function App() {
     <div className="app-root">
       <main className="app-main">
         <div style={{ display: activeGame ? 'none' : 'block', width: '100%', height: '100%' }}>
-          <BrainViewer onSelectRegion={setSelectedRegion} showLabels={!activeGame} />
+          <BrainViewer
+            onSelectRegion={setSelectedRegion}
+            showLabels={!activeGame}
+            colorIndices={colorIndices}
+            setColorIndices={setColorIndices}
+          />
         </div>
 
         {activeGame && (
           <ActivityContainer
             activity={activeGame}
-            onClose={() => setActiveGame(null)}
+            onClose={() => {
+              handleGameComplete()
+              setActiveGame(null)
+            }}
           />
         )}
 
