@@ -1,3 +1,11 @@
+.app-root,
+.app-main {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
 .side-panel {
   position: absolute;
   top: 0;

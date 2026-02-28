@@ -75,7 +75,7 @@ function BrainModel({
   showLabels = true,
 }: BrainModelProps) {
   const gltf = useGLTF(url)
-  const { coloredScene, centers, labelAnchors } = useMemo(() => {
+  const { coloredScene, centers, labelAnchors, maxIdx, maxVal } = useMemo(() => {
     let index = 0
     const centersList: THREE.Vector3[] = []
 
@@ -129,6 +129,16 @@ function BrainModel({
       sceneCenter.divideScalar(centersList.length)
     }
 
+    // Find the most stressed region index
+    let maxIdx = -1
+    let maxVal = -1
+    colorIndices.forEach((val, i) => {
+      if (val > maxVal) {
+        maxVal = val
+        maxIdx = i
+      }
+    })
+
     const anchors = centersList.map((center, idx) => {
       const direction = center.clone().sub(sceneCenter)
       if (direction.lengthSq() === 0) {
@@ -143,7 +153,7 @@ function BrainModel({
         .add(new THREE.Vector3(0, verticalNudge, 0))
     })
 
-    return { coloredScene: gltf.scene, centers: centersList, labelAnchors: anchors }
+    return { coloredScene: gltf.scene, centers: centersList, labelAnchors: anchors, maxIdx, maxVal }
   }, [
     gltf,
     colorIndices,
@@ -152,49 +162,56 @@ function BrainModel({
   return (
     <group rotation={[0, 0.3, 0]}>
       <primitive object={coloredScene} />
-      {showLabels && centers.map((pos, idx) => (
-        <group key={idx}>
-          <Line points={[pos, labelAnchors[idx]]} color="#ffffffff" lineWidth={1} />
-          <Html position={pos} center pointerEvents="none">
-            <div
-              style={{
-                width: '16px',
-                height: '16px',
-                backgroundColor: 'white',
-                borderRadius: '50%',
-                boxShadow: '0 0 4px rgba(0,0,0,0.5)',
-              }}
-            />
-          </Html>
-          <Html position={labelAnchors[idx]} center pointerEvents="auto">
-            <button
-              type="button"
-              className="brain-label"
-              onClick={(e) => {
-                e.stopPropagation()
-                if (onSelectRegion) {
-                  onSelectRegion(REGION_KEYS[idx])
-                }
-              }}
-              style={{
-                backgroundColor: 'rgba(104, 104, 104, 0.8)',
-                color: '#ffffffff',
-                padding: '2px 4px',
-                fontSize: '13px',
-                fontWeight: 400,
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-                whiteSpace: 'nowrap',
-                transition: 'transform 0.2s',
-              }}
-            >
-              {REGION_LABELS[idx] ?? `Region ${idx + 1}`}
-            </button>
-          </Html>
-        </group>
-      ))}
+      {showLabels && centers.map((pos, idx) => {
+        const isMostStressed = idx === maxIdx && maxVal > 0.1
+        return (
+          <group key={idx}>
+            <Line points={[pos, labelAnchors[idx]]} color="#ffffffff" lineWidth={1} />
+            <Html position={pos} center pointerEvents="none">
+              <div
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  backgroundColor: 'white',
+                  borderRadius: '50%',
+                  boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+                }}
+              />
+            </Html>
+            <Html position={labelAnchors[idx]} center pointerEvents="auto">
+              <button
+                type="button"
+                className="brain-label"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (onSelectRegion) {
+                    onSelectRegion(REGION_KEYS[idx])
+                  }
+                }}
+                style={{
+                  backgroundColor: isMostStressed ? 'rgba(255, 107, 107, 0.9)' : 'rgba(104, 104, 104, 0.8)',
+                  color: '#ffffffff',
+                  padding: '2px 8px',
+                  fontSize: '13px',
+                  fontWeight: isMostStressed ? 600 : 400,
+                  border: isMostStressed ? '1px solid white' : 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  boxShadow: isMostStressed ? '0 0 15px rgba(255, 107, 107, 0.6)' : '0 4px 10px rgba(0, 0, 0, 0.2)',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                {isMostStressed && <span>⚠️</span>}
+                {REGION_LABELS[idx] ?? `Region ${idx + 1}`}
+              </button>
+            </Html>
+          </group>
+        )
+      })}
     </group>
   )
 }
@@ -245,13 +262,12 @@ type BrainViewerProps = {
   onSelectRegion?: (region: typeof REGION_KEYS[number]) => void
   showLabels?: boolean
   colorIndices: number[]
-  setColorIndices: (indices: number[]) => void
 }
 
 // @ts-expect-error - index.js is a plain JS file
 import { calculate_neuro_interface_values } from './index'
 
-export function BrainViewer({ onSelectRegion, showLabels = true, colorIndices, setColorIndices }: BrainViewerProps) {
+export function BrainViewer({ onSelectRegion, showLabels = true, colorIndices }: BrainViewerProps) {
   return (
     <div className="brain-viewer" style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Canvas
@@ -282,41 +298,6 @@ export function BrainViewer({ onSelectRegion, showLabels = true, colorIndices, s
           maxDistance={1000}
         />
       </Canvas>
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '20px',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(5, 5, 10, 0.8)',
-          padding: '15px 20px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255,255,255,0.15)',
-        }}
-      >
-        {REGION_LABELS.map((label, idx) => (
-          <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'white' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>{label}</label>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={colorIndices[idx]}
-              onChange={(e) => {
-                const newIndices = [...colorIndices]
-                newIndices[idx] = parseFloat(e.target.value)
-                setColorIndices(newIndices)
-              }}
-              style={{ cursor: 'pointer', width: '100px' }}
-            />
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
